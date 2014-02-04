@@ -1,53 +1,125 @@
 <?php
 
+/* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
+
+/**
+ * Fuel prices crawler
+ * 
+ * Fetches fuel prices from Globus and Tank-Ono websites.   
+ * 
+ * PHP version 5
+ *
+ * @category  CategoryName
+ * @package   PackageName       
+ * @author    Petr Pohl <peca.pohl@gmail.com>
+ * @copyright 2014 Petr Pohl
+ * @license   http://www.php.net/license/3_01.txt  PHP License 3.01
+ * @link      http://pear.php.net/package/PackageName 
+ */
+
+/**
+ * Fuel
+ *
+ * @category CategoryName
+ * @package  PackageName
+ * @author   Petr Pohl <peca.pohl@gmail.com>
+ * @license  http://www.php.net/license/3_01.txt  PHP License 3.01
+ * @version  Release: @package_version@* 
+ * @link     http://pear.php.net/package/PackageName 
+ */ 
 class Fuel
 {
-    private $url;
-    private $page;
-    private $line;
+    /**
+     * @var string	 	 	 	     
+     * @access private
+     */
+    private $_url;
+
+    /**
+     * @var string	 	 	 	     
+     * @access private	      
+     */
+    private $_page;
+
+    /**
+     * @var string	 	 	 	     
+     * @access private	      
+     */    
+    private $_line;
 
     const TANK_ONO = 'http://www.tank-ono.cz/cz/index.php?page=cenik';
     const GLOBUS_CAKOVICE = 'http://www.globus.cz/globus-cakovice/cerpaci-stanice.html';
     const GLOBUS_CERNY_MOST = 'http://www.globus.cz/globus-cerny-most/cerpaci-stanice.html';
-
-    public function getPage($url)
+    
+    /**
+     * getPage
+     * 
+     * @param string $_url the string to quote	      
+     * 
+     * @return (string)
+     */
+    public function getPage($_url)
     {
-        $this->page = file_get_contents($url);
+        $this->page = file_get_contents($_url);
         return $this->page;
     }
 
+    /**
+     * fetchPrices
+     * 
+     * @return (string)
+     */
     public function fetchPrices()
     {
-        $page = $this->getPage(self::TANK_ONO);
-        $this->line = $this->parseTankOno($page);
+        $_page = $this->getPage(self::TANK_ONO);
+        $this->line = $this->parseTankOno($_page);
         $this->line .= " Kč Tank Ono";
+        $this->line .= "<br />";
 
-        $page = $this->getPage(self::GLOBUS_CERNY_MOST);
-        $this->line .= $this->parseGlobus($page);
+        $_page = $this->getPage(self::GLOBUS_CERNY_MOST);
+        $this->line .= $this->parseGlobus($_page);
         $this->line .= " Kč Globus Černý most";
+        $this->line .= "<br />";
 
-        $page = $this->getPage(self::GLOBUS_CAKOVICE);
-        $this->line .= $this->parseGlobus($page);
+        $_page = $this->getPage(self::GLOBUS_CAKOVICE);
+        $this->line .= $this->parseGlobus($_page);
         $this->line .= " Kč Globus Čakovice";
+        $this->line .= "<br />";
+        
         return $this->line;
     }
 
-    public function parseTankOno($page)
+    /**
+     * parseTankOno
+     * 
+     * @param string $_page the string to parse	      
+     *     
+     * @return string
+     */
+    public function parseTankOno($_page)
     {
-        $lineNumber = strpos($page, 'Trutnov');
-        $lines = substr($page, $lineNumber, 100);
+        $lineNumber = strpos($_page, 'Trutnov');
+        $lines = substr($_page, $lineNumber, 100);
         $stringNumber = strpos($lines, ',');
-        $line = substr(substr($lines, $stringNumber-2), 0, 5);
-        return $line;
+        $_line = substr(substr($lines, $stringNumber-2), 0, 5);
+        return $_line;
     }
 
-    public function parseGlobus($page)
+    /**
+     * parseGlobus
+     *
+     * @param string $_page the string to parse
+     * 	 	 	      
+     * @return string 
+     */
+    public function parseGlobus($_page)
     {
-        $lineNumber = strpos($page, 'Natural 95');
-        $lines = substr($page, $lineNumber, 30);
+        $lineNumber = strpos($_page, 'Natural 95');
+        $lines = substr($_page, $lineNumber, 30);
         $stringNumber = strpos($lines, '.');
-        $line = substr(substr($lines, $stringNumber-2), 0, 5);
-        $line = str_replace('.', ',', $line);
-        return $line;
+        $_line = substr(substr($lines, $stringNumber-2), 0, 5);
+        $_line = str_replace('.', ',', $_line);
+        
+        return $_line;
     }
 }
